@@ -1,27 +1,13 @@
 import React, { Component } from "react";
-import {
-  Container,
-  Header,
-  Title,
-  Content,
-  Button,
-  Left,
-  Right,
-  Body,
-  Icon,
-  Text
-} from "native-base";
+import { Container, Content, Body, Text } from "native-base";
 import Footer from "../../components/footer";
+import Header from "../../components/header";
 
 export default class Kitchen extends Component {
   render() {
     return (
       <Container>
-        <Header>
-          <Body>
-            <Title>Rowans Kitchen</Title>
-          </Body>
-        </Header>
+        <Header />
         <Content />
         <Footer />
       </Container>
