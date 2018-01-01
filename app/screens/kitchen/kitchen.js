@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Container, Content, Body, Text, Thumbnail } from "native-base";
+import { Client, Message } from "react-native-paho-mqtt";
 import { View, TouchableOpacity, Dimensions } from "react-native";
 const { width, height } = Dimensions.get("window");
 import Footer from "../../components/footer";
@@ -12,13 +13,46 @@ export default class Kitchen extends Component {
     super();
 
     this.state = {
-      light: false
+      light: "no"
     };
+  }
+
+  componentDidMount() {
+    // set event handlers
+    this.props.mqttClient.on("connectionLost", responseObject => {
+      console.log(responseObject);
+      if (responseObject.errorCode !== 0) {
+        console.log(responseObject.errorMessage);
+      }
+    });
+    this.props.mqttClient.on("messageReceived", message => {
+      console.log(message.payloadString);
+    });
+    // connect the mqttClient
+    this.props.mqttClient
+      .connect()
+      .then(() => {
+        // Once a connection has been made, make a subscription and send a message.
+        console.log("onConnect");
+        return this.props.mqttClient.subscribe("World");
+      })
+      .then(() => {
+        const message = new Message("Hello");
+        message.destinationName = "World";
+        this.props.mqttClient.send(message);
+      })
+      .catch(responseObject => {
+        console.log(responseObject);
+        if (responseObject.errorCode !== 0) {
+          console.log("onConnectionLost:" + responseObject.errorMessage);
+        }
+      });
   }
   render() {
     const bulbIcon = this.state.light
       ? require("../../images/light-bulb.png")
       : require("../../images/light-bulb-off.png");
+    console.log(this.props.mqttClient);
     return (
       <Container>
         <Header />
@@ -39,7 +73,19 @@ export default class Kitchen extends Component {
                 justifyContent: "center",
                 backgroundColor: "#c49ae9"
               }}
-              onPress={() => console.log("Setting the ligths")}
+              onPress={() => {
+                console.log("Setting the ligths");
+                if (this.state.light === "yes") {
+                  lightState = "no";
+                } else {
+                  lightState = "yes";
+                }
+                console.log("lightState", lightState);
+                const message = new Message(lightState);
+
+                message.destinationName = "World";
+                this.props.mqttClient.send(message);
+              }}
             >
               <Thumbnail square source={bulbIcon} />
             </TouchableOpacity>
