@@ -27,6 +27,7 @@ export default class Kitchen extends Component {
     });
     this.props.mqttClient.on("messageReceived", message => {
       console.log(message.payloadString);
+      this.setState({ light: message.payloadString });
     });
     // connect the mqttClient
     this.props.mqttClient
@@ -49,9 +50,12 @@ export default class Kitchen extends Component {
       });
   }
   render() {
-    const bulbIcon = this.state.light
-      ? require("../../images/light-bulb.png")
-      : require("../../images/light-bulb-off.png");
+    let bulbIcon = "";
+    if (this.state.light === "yes") {
+      bulbIcon = require("../../images/light-bulb.png");
+    } else {
+      bulbIcon = require("../../images/light-bulb-off.png");
+    }
     console.log(this.props.mqttClient);
     return (
       <Container>
@@ -74,6 +78,7 @@ export default class Kitchen extends Component {
                 backgroundColor: "#c49ae9"
               }}
               onPress={() => {
+                let lightState = "";
                 console.log("Setting the ligths");
                 if (this.state.light === "yes") {
                   lightState = "no";
@@ -85,6 +90,7 @@ export default class Kitchen extends Component {
 
                 message.destinationName = "World";
                 this.props.mqttClient.send(message);
+                this.setState({ light: lightState });
               }}
             >
               <Thumbnail square source={bulbIcon} />
